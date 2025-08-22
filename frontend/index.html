@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math API V2 - Sprint 1 Interface</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+            background: #f8f9fa;
+            min-height: 100px;
+            display: none;
+        }
+        
+        .error {
+            border-left-color: #e74c3c;
+            background: #ffeaa7;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e1e1e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Math API V2</h1>
+            <p>Sprint 1 - Collaborative Development Interface</p>
+            <small>Developed by: Frontend Developer</small>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="command">📋 API 명령 선택:</label>
+                <select id="command">
+                    <option value="">-- 명령을 선택하세요 --</option>
+                    <option value="HELLO">HELLO - 인사 메시지</option>
+                    <option value="STATUS">STATUS - 시스템 상태 확인</option>
+                    <option value="INFO">INFO - 프로젝트 정보</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="customCmd">🔧 사용자 정의 명령:</label>
+                <input type="text" id="customCmd" placeholder="직접 명령어를 입력하세요 (선택사항)">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="sendAPIRequest()">
+                    🚀 API 호출
+                </button>
+                <button class="btn-secondary" onclick="clearResult()">
+                    🗑 결과 지우기
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                ⏳ API 요청 처리 중...
+            </div>
+            
+            <div id="result"></div>
+        </div>
+        
+        <div class="footer">
+            <p>🤝 GitHub Collaboration Practice | Sprint 1 V2</p>
+            <p>Team: PM, Frontend, Backend, DevOps</p>
+        </div>
+    </div>
+
+    <script>
+        function sendAPIRequest() {
+            const command = $('#command').val() || $('#customCmd').val().trim();
+            
+            if (!command) {
+                showResult('⚠️ 명령을 선택하거나 입력해주세요.', true);
+                return;
+            }
+            
+            // 로딩 표시
+            $('#loading').show();
+            $('#result').hide();
+            
+            // API 호출
+            $.ajax({
+                url: '/index.php',
+                method: 'GET',
+                data: { CMD: command },
+                dataType: 'json',
+                timeout: 5000,
+                success: function(response) {
+                    $('#loading').hide();
+                    const formattedResponse = JSON.stringify(response, null, 2);
+                    showResult('✅ API 응답 성공:\n\n' + formattedResponse, false);
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    let errorMsg = '❌ API 호출 실패:\n\n';
+                    errorMsg += `Status: ${xhr.status}\n`;
+                    errorMsg += `Error: ${error}\n`;
+                    if (xhr.responseText) {
+                        errorMsg += `Response: ${xhr.responseText}`;
+                    }
+                    showResult(errorMsg, true);
+                }
+            });
+        }
+        
+        function showResult(text, isError) {
+            const resultDiv = $('#result');
+            resultDiv.removeClass('error');
+            if (isError) {
+                resultDiv.addClass('error');
+            }
+            resultDiv.html('<pre>' + text + '</pre>').show();
+            
+            // 결과 영역으로 스크롤
+            resultDiv[0].scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function clearResult() {
+            $('#result').hide();
+            $('#loading').hide();
+            $('#command').val('');
+            $('#customCmd').val('');
+        }
+        
+        // Enter 키 이벤트 처리
+        $('#customCmd').keypress(function(e) {
+            if (e.which == 13) {
+                sendAPIRequest();
+            }
+        });
+        
+        // 페이지 로드 시 초기화
+        $(document).ready(function() {
+            console.log('🚀 Math API V2 Frontend Interface Loaded');
+            console.log('👩‍💻 Developed by: Frontend Developer');
+        });
+    </script>
+</body>
+</html>
